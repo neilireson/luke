@@ -1,7 +1,7 @@
 # luke5
 Luke for Lucene version 5
 
-A mavenised version of Luke which works with version 5, and should also be compatible with version 4 indexes.
+A mavenised version of Luke which works with version 5, and also with all version 4 indexes.
 
 ## History
 
