@@ -15,7 +15,7 @@ import org.apache.lucene.index.TermsEnum;
 public class TermVectorMapper {
 
   public static List<IntPair> map(Terms terms, TermsEnum reuse, boolean acceptTermsOnly, boolean convertOffsets) throws IOException {
-    TermsEnum te = terms.iterator(reuse);
+    TermsEnum te = terms.iterator();
     DocsAndPositionsEnum dpe = null;
     List<IntPair> res = new ArrayList<>();
     while (te.next() != null) {

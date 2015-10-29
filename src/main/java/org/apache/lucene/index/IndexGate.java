@@ -244,15 +244,15 @@ public class IndexGate {
     return compound > nonCompound;
   }
   
-  public static void deletePendingFiles(Directory dir, IndexDeletionPolicy policy) throws Exception {
-    SegmentInfos infos = new SegmentInfos();
-    infos=SegmentInfos.readLatestCommit(dir);
-    IndexWriterConfig cfg = new IndexWriterConfig(new WhitespaceAnalyzer());
-    IndexWriter iw = new IndexWriter(dir, cfg);
-    IndexFileDeleter deleter = new IndexFileDeleter(dir, policy, infos, null, iw, true);
-    deleter.close();
-    iw.close();
-  }
+//  public static void deletePendingFiles(Directory dir, IndexDeletionPolicy policy) throws Exception {
+//    SegmentInfos infos = new SegmentInfos();
+//    infos=SegmentInfos.readLatestCommit(dir);
+//    IndexWriterConfig cfg = new IndexWriterConfig(new WhitespaceAnalyzer());
+//    IndexWriter iw = new IndexWriter(dir, cfg);
+//    IndexFileDeleter deleter = new IndexFileDeleter(dir, policy, infos, null, iw, true);
+//    deleter.close();
+//    iw.close();
+//  }
   
   public static List<String> getDeletableFiles(Directory dir) throws Exception {
     List<String> known = getIndexFiles(dir);

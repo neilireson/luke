@@ -65,7 +65,7 @@ public class DocReconstructor extends Observable {
       numTerms = 0;            
       for (String fld : fields) {
         Terms t = fields.terms(fld);
-        TermsEnum te = t.iterator(null);
+        TermsEnum te = t.iterator();
         while (te.next() != null) {
           numTerms++;
         }
@@ -112,7 +112,7 @@ public class DocReconstructor extends Observable {
     for (int i = 0; i < fieldNames.length; i++) {
       Terms tvf = reader.getTermVector(docNum, fieldNames[i]);
       if (tvf != null) { // has vectors for this field
-        te = tvf.iterator(te);
+        te = tvf.iterator();
         progress.message = "Checking term vectors for '" + fieldNames[i] + "' ...";
         progress.curValue = i;
         setChanged();
@@ -147,7 +147,7 @@ public class DocReconstructor extends Observable {
       if (terms == null) { // no terms in this field
         continue;
       }
-      te = terms.iterator(te);
+      te = terms.iterator();
       while (te.next() != null) {
         DocsAndPositionsEnum newDpe = te.docsAndPositions(live, dpe, 0);
         if (newDpe == null) { // no position info for this field

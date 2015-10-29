@@ -112,7 +112,7 @@ public class HighFreqTerms {
    * 
    * @param reader
    * @param numTerms
-   * @param field
+   * @param fieldNames
    * @return TermStats[] ordered by terms with highest docFreq first.
    * @throws Exception
    */
@@ -130,7 +130,7 @@ public class HighFreqTerms {
       for (String field : fieldNames) {
         Terms terms = fields.terms(field);
         if (terms != null) {
-          te = terms.iterator(te);
+          te = terms.iterator();
           fillQueue(te, tiq, field);
         }
       }
@@ -145,7 +145,7 @@ public class HighFreqTerms {
         String field = fields.iterator().next();
         if (field != null) {
           Terms terms = fields.terms(field);
-          te = terms.iterator(te);
+          te = terms.iterator();
           fillQueue(te, tiq, field);
         } else {
           break;
