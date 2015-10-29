@@ -8,7 +8,7 @@ A mavenised version of Luke which works with version 5, and also with all versio
 
 Originally "forked" from https://code.google.com/p/luke/.
 
-I originally mavenised the code so I could more easily (for me) keep up-to-date with the latest Lucene version (see https://groups.google.com/d/msg/luke-discuss/MNT_teDxVno/p8AB1Ibjb_EJ).
+I mavenised the code so I could more easily (for me) keep up-to-date with the latest Lucene version (see https://groups.google.com/d/msg/luke-discuss/MNT_teDxVno/p8AB1Ibjb_EJ).
 
 This has lead to a couple of other forks of luke:
 * https://github.com/tarzanek/luke
