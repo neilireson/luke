@@ -16,7 +16,7 @@ This has lead to a couple of other forks of luke:
 
 The code functionality is not being maintained, I merely intend to get the code working with the latest Lucene version and try not to break anything important. So far I think most everything still works, however nothing is rigorously tested. So best not use it on the only copy of your last five years worth of data.
 
-There is some hope that there will be an "official" applications to take the place of Luke (https://issues.apache.org/jira/browse/LUCENE-2562) but this is not here yet.
+There is some hope that there will be an "official" application to take the place of Luke (https://issues.apache.org/jira/browse/LUCENE-2562) but this is not here yet.
 
 It's also worth noting that there is a Command Line tool for Lucene, https://github.com/javasoze/clue, which is also working with Lucene 5.
 
