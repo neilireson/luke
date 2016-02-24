@@ -2,6 +2,7 @@ package org.getopt.luke;
 
 import java.io.IOException;
 
+import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Scorer;
 
 public class NoScoringScorer extends Scorer {
@@ -17,17 +18,7 @@ public class NoScoringScorer extends Scorer {
   }
 
   @Override
-  public int advance(int doc) throws IOException {
-    return 0;
-  }
-
-  @Override
   public int docID() {
-    return 0;
-  }
-
-  @Override
-  public int nextDoc() throws IOException {
     return 0;
   }
 
@@ -37,9 +28,10 @@ public class NoScoringScorer extends Scorer {
     return 1;
   }
 
-    @Override
-    public long cost() {
-        return 0;
-    }
+  @Override
+  public DocIdSetIterator iterator()
+  {
+    return null;
+  }
 
 }

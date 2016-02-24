@@ -6,7 +6,7 @@
 
     <groupId>luke</groupId>
     <artifactId>luke</artifactId>
-    <version>5.3.1</version>
+    <version>5.5.0</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

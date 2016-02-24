@@ -53,11 +53,11 @@ import org.apache.lucene.index.TermsEnum.SeekStatus;
 import org.apache.lucene.codecs.Codec;
 import org.apache.lucene.misc.SweetSpotSimilarity;
 import org.apache.lucene.queries.mlt.MoreLikeThis;
+import org.apache.lucene.queries.payloads.PayloadNearQuery;
+import org.apache.lucene.queries.payloads.PayloadTermQuery;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.lucene.search.payloads.PayloadNearQuery;
-import org.apache.lucene.search.payloads.PayloadTermQuery;
 import org.apache.lucene.search.similarities.DefaultSimilarity;
 import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.search.similarities.TFIDFSimilarity;
@@ -4559,7 +4559,7 @@ public class Luke extends Thinlet implements ClipboardOwner {
         _explainStructure(n1, snq.getExclude());
       } else if (q instanceof SpanTermQuery) {
         SpanTermQuery stq = (SpanTermQuery)sq;
-        setString(n, "text", getString(n, "text") + ", term=" + stq.getTerm());        
+        setString(n, "text", getString(n, "text") + ", term=" + stq.getTerm());
         if (stq instanceof PayloadTermQuery) {
           try {
             java.lang.reflect.Field function = PayloadTermQuery.class.getDeclaredField("function");
