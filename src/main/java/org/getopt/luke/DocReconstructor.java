@@ -108,7 +108,7 @@ public class DocReconstructor extends Observable {
     progress.curValue = 0;
     progress.minValue = 0;
     TermsEnum te = null;
-    DocsAndPositionsEnum dpe = null;
+    PostingsEnum dpe = null;
     for (int i = 0; i < fieldNames.length; i++) {
       Terms tvf = reader.getTermVector(docNum, fieldNames[i]);
       if (tvf != null) { // has vectors for this field
@@ -149,7 +149,7 @@ public class DocReconstructor extends Observable {
       }
       te = terms.iterator();
       while (te.next() != null) {
-        DocsAndPositionsEnum newDpe = te.docsAndPositions(live, dpe, 0);
+        PostingsEnum newDpe = te.postings(dpe, 0);
         if (newDpe == null) { // no position info for this field
           break;
         }

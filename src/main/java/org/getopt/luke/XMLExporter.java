@@ -218,21 +218,20 @@ public class XMLExporter extends Observable {
   private void writeTermVector(BufferedWriter bw, Terms tfv, Bits liveDocs) throws Exception {
     bw.write("<tv>\n");
     TermsEnum te = tfv.iterator();
-    DocsAndPositionsEnum dpe = null;
+    PostingsEnum dpe = null;
     StringBuilder positions = new StringBuilder();
     StringBuilder offsets = new StringBuilder();
     while (te.next() != null) {
       // collect
       positions.setLength(0);
       offsets.setLength(0);
-      DocsAndPositionsEnum newDpe = te.docsAndPositions(liveDocs, dpe,
-              DocsAndPositionsEnum.FLAG_OFFSETS);
+      PostingsEnum newDpe = te.postings(dpe, PostingsEnum.OFFSETS);
       if (newDpe == null) {
         continue;
       }
       dpe = newDpe;
       // there's only at most one doc here, so position the enum
-      if (dpe.nextDoc() == DocsEnum.NO_MORE_DOCS) {
+      if (dpe.nextDoc() == PostingsEnum.NO_MORE_DOCS) {
         continue;
       }
       for (int k = 0; k < dpe.freq(); k++) {

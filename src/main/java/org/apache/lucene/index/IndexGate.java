@@ -202,10 +202,10 @@ public class IndexGate {
           if (indexFormat == CodecUtil.CODEC_MAGIC) {
             res.genericName = "Lucene 4.x or 5.x";
             res.capabilities = "flexible, codec-specific";
-            int actualVersion = SegmentInfos.VERSION_40;
+            int actualVersion = SegmentInfos.VERSION_CURRENT;
             try {
-              actualVersion = CodecUtil.checkHeaderNoMagic(in, "segments", SegmentInfos.VERSION_40, Integer.MAX_VALUE);
-              if (actualVersion > SegmentInfos.VERSION_53) {
+              actualVersion = CodecUtil.checkHeaderNoMagic(in, "segments", SegmentInfos.VERSION_CURRENT, Integer.MAX_VALUE);
+              if (actualVersion > SegmentInfos.VERSION_CURRENT) {
                 res.capabilities += " (WARNING: newer version of Lucene than this tool)";
               }
             } catch (Exception e) {

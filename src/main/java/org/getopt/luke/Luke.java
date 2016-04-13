@@ -53,12 +53,11 @@ import org.apache.lucene.index.TermsEnum.SeekStatus;
 import org.apache.lucene.codecs.Codec;
 import org.apache.lucene.misc.SweetSpotSimilarity;
 import org.apache.lucene.queries.mlt.MoreLikeThis;
-import org.apache.lucene.queries.payloads.PayloadNearQuery;
-import org.apache.lucene.queries.payloads.PayloadTermQuery;
+import org.apache.lucene.queries.payloads.PayloadScoreQuery;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.lucene.search.similarities.DefaultSimilarity;
+import org.apache.lucene.search.similarities.ClassicSimilarity;
 import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.search.similarities.TFIDFSimilarity;
 import org.apache.lucene.search.spans.SpanFirstQuery;
@@ -70,7 +69,7 @@ import org.apache.lucene.search.spans.SpanTermQuery;
 import org.apache.lucene.store.*;
 import org.apache.lucene.util.AttributeSource;
 import org.apache.lucene.util.BytesRef;
-import org.apache.lucene.util.NumericUtils;
+import org.apache.lucene.util.LegacyNumericUtils;
 import org.apache.lucene.util.Version;
 import org.apache.lucene.util.automaton.Automaton;
 import org.apache.lucene.util.automaton.Transition;
@@ -3294,7 +3293,7 @@ public class Luke extends Thinlet implements ClipboardOwner {
         }
       } catch (Throwable t) {
         t.printStackTrace();
-        showStatus("Invalid similarity class " + simClassString + ", using DefaultSimilarity.");
+        showStatus("Invalid similarity class " + simClassString + ", using ClassicSimilarity.");
       }
     }
     if (s == null) {
@@ -3394,7 +3393,7 @@ public class Luke extends Thinlet implements ClipboardOwner {
           case "cbLong":
               try
               {
-                  long num = NumericUtils.prefixCodedToLong(new BytesRef(f.stringValue()));
+                  long num = LegacyNumericUtils.prefixCodedToLong(new BytesRef(f.stringValue()));
                   value = String.valueOf(num);
                   len = 1;
               }
@@ -3795,12 +3794,12 @@ public class Luke extends Thinlet implements ClipboardOwner {
       public void execute() {
         try {
           //DocsEnum td = ar.termDocsEnum(ar.getLiveDocs(), t.field(), new BytesRef(t.text()), 0);
-          DocsEnum td = ar.termDocsEnum(t);
+          PostingsEnum td = ar.postings(t);
           if (td == null) {
             showStatus("No such term: " + t);
             return;
           }
-          if (td.nextDoc() == DocsEnum.NO_MORE_DOCS) {
+          if (td.nextDoc() == PostingsEnum.NO_MORE_DOCS) {
             showStatus("No documents with this term: " + t + " (NO_MORE_DOCS)");
             return;
           }
@@ -3830,12 +3829,12 @@ public class Luke extends Thinlet implements ClipboardOwner {
     SlowThread st = new SlowThread(this) {
       public void execute() {
         try {
-          DocsEnum td = (DocsEnum) getProperty(fText, "td");
+          PostingsEnum td = (PostingsEnum) getProperty(fText, "td");
           if (td == null) {
             showFirstTermDoc(fText);
             return;
           }
-          if (td.nextDoc() == DocsEnum.NO_MORE_DOCS) {
+          if (td.nextDoc() == PostingsEnum.NO_MORE_DOCS) {
             showStatus("No more docs for this term");
             return;
           }
@@ -3885,17 +3884,17 @@ public class Luke extends Thinlet implements ClipboardOwner {
               }
             }
           }
-          DocsEnum tdd = (DocsEnum)getProperty(fText, "td");
+          PostingsEnum tdd = (PostingsEnum)getProperty(fText, "td");
           if (tdd == null) {
             showStatus("Unknown document number.");
             return;
           }
-          int flags = DocsAndPositionsEnum.FLAG_PAYLOADS;
+          int flags = PostingsEnum.PAYLOADS;
           if (withOffsets) {
-            flags |= DocsAndPositionsEnum.FLAG_OFFSETS;
+            flags |= PostingsEnum.OFFSETS;
           }
-          //DocsAndPositionsEnum td = ar.termPositionsEnum(ar.getLiveDocs(), t.field(), t.bytes(), flags);
-          DocsAndPositionsEnum td = ar.termPositionsEnum(t);
+          //PostingsEnum td = ar.termPositionsEnum(ar.getLiveDocs(), t.field(), t.bytes(), flags);
+          PostingsEnum td = ar.postings(t);
           if (td == null) {
             showStatus("No position information available for this term.");
             return;
@@ -4253,7 +4252,7 @@ public class Luke extends Thinlet implements ClipboardOwner {
     Object simClass = find(srchOpts, "simClass");
     Object ckSimCust = find(srchOpts, "ckSimCust");
     if (getBoolean(ckSimDef, "selected")) {
-      return new DefaultSimilarity();
+      return new ClassicSimilarity();
     } else if (getBoolean(ckSimSweet, "selected")) {
       return new SweetSpotSimilarity();
     } else if (getBoolean(ckSimOther, "selected")) {
@@ -4270,12 +4269,12 @@ public class Luke extends Thinlet implements ClipboardOwner {
         showStatus("ERROR: invalid Similarity, using default");
         setBoolean(ckSimDef, "selected", true);
         setBoolean(ckSimOther, "selected", false);
-        return new DefaultSimilarity();
+        return new ClassicSimilarity();
       }
     } else if (getBoolean(ckSimCust, "selected")) {
       return similarity;
     } else {
-      return new DefaultSimilarity();
+      return new ClassicSimilarity();
     }
   }
 
@@ -4338,7 +4337,7 @@ public class Luke extends Thinlet implements ClipboardOwner {
     } else if (clazz.startsWith("org.apache.solr.")) {
       clazz = "solr." + q.getClass().getSimpleName();
     }
-    float boost = q.getBoost();
+    float boost = (q instanceof BoostQuery) ? ((BoostQuery)q).getBoost() : 0;
     Object n = create("node");
     add(parent, n);
     String msg = clazz;
@@ -4354,10 +4353,10 @@ public class Luke extends Thinlet implements ClipboardOwner {
       add(n, n1);
     } else if (clazz.equals("lucene.BooleanQuery")) {
       BooleanQuery bq = (BooleanQuery)q;
-      BooleanClause[] clauses = bq.getClauses();
+      List<BooleanClause> clauses = bq.clauses();
       int max = bq.getMaxClauseCount();
       Object n1 = create("node");
-      String descr = "clauses=" + clauses.length +
+      String descr = "clauses=" + clauses.size() +
       ", maxClauses=" + max;
       if (bq.isCoordDisabled()) {
         descr += ", coord=false";
@@ -4367,10 +4366,10 @@ public class Luke extends Thinlet implements ClipboardOwner {
       }
       setString(n1, "text", descr);
       add(n, n1);
-      for (int i = 0; i < clauses.length; i++) {
+      for (int i = 0; i < clauses.size(); i++) {
         n1 = create("node");
         String occur;
-        Occur occ = clauses[i].getOccur();
+        Occur occ = clauses.get(i).getOccur();
         if (occ.equals(Occur.MUST)) {
           occur = "MUST";
         } else if (occ.equals(Occur.MUST_NOT)) {
@@ -4382,7 +4381,7 @@ public class Luke extends Thinlet implements ClipboardOwner {
         }
         setString(n1, "text", "Clause " + i + ": " + occur);
         add(n, n1);
-        _explainStructure(n1, clauses[i].getQuery());
+        _explainStructure(n1, clauses.get(i).getQuery());
       }
     } else if (clazz.equals("lucene.PrefixQuery")) {
       Object n1 = create("node");
@@ -4511,12 +4510,12 @@ public class Luke extends Thinlet implements ClipboardOwner {
       if (cq.getQuery() != null) {
         _explainStructure(n, cq.getQuery());
       }
-    } else if (q instanceof FilteredQuery) {
-      FilteredQuery fq = (FilteredQuery)q;
-      Object n1 = create("node");
-      setString(n1, "text", "Filter: " + fq.getFilter().toString());
-      add(n, n1);
-      _explainStructure(n, fq.getQuery());
+//    } else if (q instanceof FilteredQuery) {
+//      FilteredQuery fq = (FilteredQuery)q;
+//      Object n1 = create("node");
+//      setString(n1, "text", "Filter: " + fq.getFilter().toString());
+//      add(n, n1);
+//      _explainStructure(n, fq.getQuery());
     } else if (q instanceof SpanQuery) {
       SpanQuery sq = (SpanQuery)q;
       Class sqlass = sq.getClass();
@@ -4527,23 +4526,23 @@ public class Luke extends Thinlet implements ClipboardOwner {
         for (SpanQuery sq1 : soq.getClauses()) {
           _explainStructure(n, sq1);
         }
-      } else if (sqlass == SpanFirstQuery.class) {
-        SpanFirstQuery sfq = (SpanFirstQuery)sq;
+      } else if (sqlass == SpanFirstQuery.class)
+      {
+        SpanFirstQuery sfq = (SpanFirstQuery) sq;
         setString(n, "text", getString(n, "text") + ", end=" + sfq.getEnd() + ", match:");
         _explainStructure(n, sfq.getMatch());
-      } else if (q instanceof SpanNearQuery) { // catch also known subclasses
+      } else if (sq instanceof PayloadScoreQuery) {
+        try {
+          java.lang.reflect.Field function = PayloadScoreQuery.class.getDeclaredField("function");
+          function.setAccessible(true);
+          Object func = function.get(sq);
+          setString(n, "text", getString(n, "text") + ", func=" + func.getClass().getSimpleName());
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }else if (q instanceof SpanNearQuery) { // catch also known subclasses
         SpanNearQuery snq = (SpanNearQuery)sq;
         setString(n, "text", getString(n, "text") + ", slop=" + snq.getSlop());
-        if (snq instanceof PayloadNearQuery) {
-          try {
-            java.lang.reflect.Field function = PayloadNearQuery.class.getDeclaredField("function");
-            function.setAccessible(true);
-            Object func = function.get(snq);
-            setString(n, "text", getString(n, "text") + ", func=" + func.getClass().getSimpleName());
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-        }
         for (SpanQuery sq1 : snq.getClauses()) {
           _explainStructure(n, sq1);
         }
@@ -4560,16 +4559,6 @@ public class Luke extends Thinlet implements ClipboardOwner {
       } else if (q instanceof SpanTermQuery) {
         SpanTermQuery stq = (SpanTermQuery)sq;
         setString(n, "text", getString(n, "text") + ", term=" + stq.getTerm());
-        if (stq instanceof PayloadTermQuery) {
-          try {
-            java.lang.reflect.Field function = PayloadTermQuery.class.getDeclaredField("function");
-            function.setAccessible(true);
-            Object func = function.get(stq);
-            setString(n, "text", getString(n, "text") + ", func=" + func.getClass().getSimpleName());
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-        }
       } else {
         String defField = getDefaultField(find("srchOptTabs"));
         setString(n, "text", "class=" + q.getClass().getName() + ", " + getString(n, "text") + ", toString=" + q.toString(defField));
@@ -5101,7 +5090,7 @@ public class Luke extends Thinlet implements ClipboardOwner {
     }
   }
 
-  private void _showTermDoc(Object fText, final DocsEnum td) {
+  private void _showTermDoc(Object fText, final PostingsEnum td) {
     if (ir == null) {
       showStatus(MSG_NOINDEX);
       return;
@@ -5323,7 +5312,7 @@ public class Luke extends Thinlet implements ClipboardOwner {
     return similarity;
   }
   
-  private static TFIDFSimilarity defaultSimilarity = new DefaultSimilarity();
+  private static TFIDFSimilarity defaultSimilarity = new ClassicSimilarity();
   
   /**
    * Set the current custom similarity implementation.

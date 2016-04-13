@@ -2,7 +2,7 @@ package org.getopt.luke.plugins;
 
 import java.util.Collection;
 
-import org.apache.lucene.index.DocsEnum;
+import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.MultiFields;
 import org.apache.lucene.index.TermsEnum;
@@ -106,7 +106,7 @@ public class VocabAnalysisPlugin extends LukePlugin {
           float ageTotals[] = new float[numAgeGroups];
           TermsEnum te = MultiFields.getTerms(ir, field).iterator();
           while (te.next() != null) {
-            DocsEnum td = te.docs(null, null, 0);
+            PostingsEnum td = te.postings(null, 0);
             td.nextDoc();
             float firstDocId = td.docID();
             int ageBracket = (int) ((firstDocId / numDocs) * numAgeGroups);

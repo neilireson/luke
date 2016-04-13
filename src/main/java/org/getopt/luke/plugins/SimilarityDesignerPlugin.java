@@ -12,7 +12,7 @@ import java.io.PrintStream;
 import javax.swing.JFileChooser;
 
 import org.apache.lucene.index.FieldInvertState;
-import org.apache.lucene.search.similarities.DefaultSimilarity;
+import org.apache.lucene.search.similarities.ClassicSimilarity;
 import org.getopt.luke.LukePlugin;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
@@ -187,7 +187,7 @@ public class SimilarityDesignerPlugin extends LukePlugin {
  *  
  * @author Andrzej Bialecki &lt;ab@getopt.org&gt;
  */
-class CustomSimilarity extends DefaultSimilarity {
+class CustomSimilarity extends ClassicSimilarity {
   private static final int M_A_COORD      = 0;
   private static final int M_A_IDF        = 1;
   private static final int M_A_LENGTHNORM = 2;

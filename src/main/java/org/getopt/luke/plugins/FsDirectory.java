@@ -21,14 +21,18 @@ package org.getopt.luke.plugins;
 import java.io.*;
 import java.util.Collection;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.apache.lucene.index.IndexFileNames;
 import org.apache.lucene.store.*;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.conf.Configuration;
@@ -40,8 +44,11 @@ import org.slf4j.LoggerFactory;
 public class FsDirectory extends BaseDirectory {
   private static final Logger LOG = LoggerFactory.getLogger(FsDirectory.class);
 
+  /** Used to generate temp file names in {@link #createTempOutput}. */
+  private final AtomicLong nextTempFileCounter = new AtomicLong();
+
   private FileSystem fs;
-  private Path directory;
+  protected final Path directory;
   private int ioFileBufferSize;
   
   public static class NullReporter implements IOReporter {
@@ -158,6 +165,23 @@ public class FsDirectory extends BaseDirectory {
       throw new IOException("Cannot overwrite: " + file);
 
     return new DfsIndexOutput(file, this.ioFileBufferSize);
+  }
+
+  @Override
+  public IndexOutput createTempOutput(String prefix, String suffix, IOContext context) throws IOException {
+    ensureOpen();
+    while (true) {
+      try {
+        String name = IndexFileNames.segmentFileName(prefix, suffix + "_" + Long.toString(nextTempFileCounter.getAndIncrement(), Character.MAX_RADIX), "tmp");
+        Path file = new Path(directory, name);
+        if (fs.exists(file)) {
+          continue;
+        }
+        return new DfsIndexOutput(file, this.ioFileBufferSize);
+      } catch (java.nio.file.FileAlreadyExistsException faee) {
+        // Retry with next incremented name
+      }
+    }
   }
 
 
@@ -293,7 +317,7 @@ public class FsDirectory extends BaseDirectory {
     private File localFile;
 
     public DfsIndexOutput(Path path, int ioFileBufferSize) throws IOException {
-      super(path.getName(),new FileOutputStream(new File(path.toUri())), ioFileBufferSize);
+      super("FSIndexOutput(path=\"" + path.getName() + "\")", path.getName(),new FileOutputStream(new File(path.toUri())), ioFileBufferSize);
       // create a temporary local file and set it to delete on exit
       String randStr = Integer.toString(new Random().nextInt(Integer.MAX_VALUE));
       localFile = File.createTempFile("index_" + randStr, ".tmp");

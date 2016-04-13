@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.lucene.index.DocsAndPositionsEnum;
-import org.apache.lucene.index.DocsEnum;
+import org.apache.lucene.index.PostingsEnum;
+import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
 
@@ -16,10 +16,10 @@ public class TermVectorMapper {
 
   public static List<IntPair> map(Terms terms, TermsEnum reuse, boolean acceptTermsOnly, boolean convertOffsets) throws IOException {
     TermsEnum te = terms.iterator();
-    DocsAndPositionsEnum dpe = null;
+    PostingsEnum dpe = null;
     List<IntPair> res = new ArrayList<>();
     while (te.next() != null) {
-      DocsAndPositionsEnum newDpe = te.docsAndPositions(null, dpe, DocsAndPositionsEnum.FLAG_OFFSETS);
+      PostingsEnum newDpe = te.postings(dpe, PostingsEnum.OFFSETS);
       if (newDpe == null) { // no positions and no offsets - just add terms if allowed
         if (!acceptTermsOnly) {
           return null;
@@ -31,7 +31,7 @@ public class TermVectorMapper {
       }
       dpe = newDpe;
       // term vectors have only one document, number 0
-      if (dpe.nextDoc() == DocsEnum.NO_MORE_DOCS) { // oops
+      if (dpe.nextDoc() == PostingsEnum.NO_MORE_DOCS) { // oops
         // treat this as no positions nor offsets
         int freq = (int)te.totalTermFreq();
         if (freq == -1) freq = 0;
