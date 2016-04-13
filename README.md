@@ -2,7 +2,7 @@
 
 Luke for Lucene
 
-A mavenised version of Luke which works with version 5, and also with all version 4 indexes.
+A mavenised version of Luke which works with version 6, and also with all version 4 and 5 indexes.
 
 ## History
 
@@ -26,10 +26,10 @@ Requires JDK 1.7+ and Maven 3.2.3+
 
 ## Running
 
-If all goes well Maven will generate a jar with all the necessary dependencies in the target directory called "luke-5.5.0-jar-with-dependencies.jar". Note that the version number will change depending on the Lucene version with which the code is compiled. 
+If all goes well Maven will generate a jar with all the necessary dependencies in the target directory called "luke-6.0.0-jar-with-dependencies.jar". Note that the version number will change depending on the Lucene version with which the code is compiled. 
 
 If running on JDK < 1.8 to run the code you will need to increase the PermSize available to the JVM (i.e. -XX:MaxPermSize=512m). For large indexes it's also worth giving it a bit of heap to play with (i.e. -Xmx2G). So to get things going...
 
-java -Xmx2G -XX:MaxPermSize=512m -jar luke-5.5.0-jar-with-dependencies.jar -index path_to_lucene_index
+java -Xmx2G -XX:MaxPermSize=512m -jar luke-6.0.0-jar-with-dependencies.jar -index path_to_lucene_index
 
 Note that the MaxPermSize option has been removed in JDK 1.8, and everything seems to run OK without it.
