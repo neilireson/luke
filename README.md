@@ -26,6 +26,6 @@ Requires JDK 1.8+ and Maven 3.2.3+
 
 ## Running
 
-If all goes well Maven will generate a jar with all the necessary dependencies in the target directory called "luke-6.0.0-jar-with-dependencies.jar". Note that the version number will change depending on the Lucene version with which the code is compiled. 
+If all goes well Maven will generate a jar with all the necessary dependencies in the target directory called "luke-6.2.0-jar-with-dependencies.jar". Note that the version number will change depending on the Lucene version with which the code is compiled. 
 
-java -Xmx2G -jar luke-6.0.0-jar-with-dependencies.jar -index path_to_lucene_index
+java -Xmx2G -jar luke-6.2.0-jar-with-dependencies.jar -index path_to_lucene_index
