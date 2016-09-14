@@ -148,7 +148,8 @@ public class FsDirectory extends BaseDirectory {
   }
 
   @Override
-  public void renameFile(String from, String to) throws IOException {
+  public void rename(String from, String to)
+          throws IOException {
     // DFS is currently broken when target already exists,
     // so we explicitly delete the target first.
     Path target = new Path(directory, to);
@@ -156,6 +157,12 @@ public class FsDirectory extends BaseDirectory {
       fs.delete(target, false);
     }
     fs.rename(new Path(directory, from), target);
+  }
+
+  @Override
+  public void syncMetaData()
+          throws IOException {
+
   }
 
   @Override
