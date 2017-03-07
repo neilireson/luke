@@ -6,7 +6,7 @@
 
     <groupId>luke</groupId>
     <artifactId>luke</artifactId>
-    <version>6.2.0</version>
+    <version>6.4.2</version>
 
     <licenses>
         <license>
@@ -32,10 +32,10 @@
         <maven-war-plugin.version>2.6</maven-war-plugin.version>
 
 
-        <ehcache.version>2.6.10</ehcache.version>
+        <ehcache.version>2.10.3</ehcache.version>
         <log4j.version>1.2.17</log4j.version>
-        <rhino.version>1.7R5</rhino.version>
-        <slf4j.version>1.7.21</slf4j.version>
+        <rhino.version>1.7.7.1</rhino.version>
+        <slf4j.version>1.7.24</slf4j.version>
         <slf4j.binding>slf4j-log4j12</slf4j.binding>
     </properties>
 
@@ -123,7 +123,6 @@
         	<groupId>net.sf.ehcache</groupId>
         	<artifactId>ehcache</artifactId>
         	<version>${ehcache.version}</version>
-            <type>pom</type>
         </dependency>
 
     </dependencies>
