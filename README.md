@@ -1,3 +1,10 @@
+IMPORTANT NOTICE
+================
+
+[Luke become an Apache Lucene module (as of Lucene 8.1)!](https://medium.com/@mocobeta/luke-become-an-apache-lucene-module-as-of-lucene-8-1-7d139c998b2)
+
+In short, please download [Lucene binary release package](https://lucene.apache.org/core/downloads.html) to get the latest Luke from now on.
+
 # luke
 
 Luke for Lucene
